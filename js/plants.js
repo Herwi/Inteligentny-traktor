@@ -48,4 +48,20 @@ function rozstawRosliny() {
   }
   console.log("ROZSTAWIONE");
   drawMap();
+  setInterval(function zaktualizujRosliny(){
+    console.log("F Dziala");
+    plants.forEach(Plant => {
+      if(Plant.nawodnienie > 0) Plant.nawodnienie -= 0.1;
+      if(Plant.naslonecznienie > 0)Plant.naslonecznienie -= 0.1;
+      if(Plant.poziom_stresu > 0)Plant.poziom_stresu += 0.1;
+      if(Math.round((Math.random())) == 0) {
+        Plant.chwast = 'nie';
+      }
+      else {
+        Plant.chwast = 'tak';
+      }
+      Plant.wiek += 1;
+      console.log("Nawodnienie:" + Plant.nawodnienie + " Naslonecznienie:" + Plant.naslonecznienie + " Stres:" + Plant.poziom_stresu + " Chwast:" + Plant.chwast + " Wiek:" + Plant.wiek);
+    });
+  }, 5000);
 }
