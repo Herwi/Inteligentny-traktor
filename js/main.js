@@ -7,6 +7,9 @@ let ctx = null;
 let canvas2 = null;
 let ctx2 = null;
 
+let canvas3 = null;
+let ctx3 = null;
+
 function drawMap() {
   ctx.clearRect(0, 0, 500, 500);
   for(let i in graph) {
@@ -84,6 +87,7 @@ function goThroughPath(path, i) {
     ctx.fillStyle = "#c0c0c0";
     ctx.fillRect(pos.x*2, pos.y*2, 2, 2);
     ctx2.fillRect(pos.x*2 -4, pos.y*2 -4, 10, 10);
+    positionChange();
     setTimeout(goThroughPath, 50, path, i+1);
   }
 }
@@ -107,8 +111,17 @@ window.onkeydown = function(event) {
   if(keyPr == 40) {
     if(walkable({x: pos.x, y: pos.y+1})) { pos.y++; }
   }
+  positionChange();
 
   ctx.fillStyle = "#c0c0c0";
   ctx.fillRect(pos.x*2, pos.y*2, 2, 2);
   ctx2.fillRect(pos.x*2 -4, pos.y*2 -4, 10, 10);
+}
+
+function positionChange() {
+  $('#position').html('x: ' + pos.x + ' y: ' + pos.y);
+}
+
+function goToPos(x, y) {
+  goThroughPath(astar.search(graph, {x: pos.x, y: pos.y}, {x,y}));
 }
