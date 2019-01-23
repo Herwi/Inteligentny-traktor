@@ -60,6 +60,7 @@ $( document ).ready(function () {
     }
   }
   console.log("LOADED");
+  rozstawRosliny();
   drawMap();
   ctx3.fillRect(pos.x*2 -4, pos.y*2 -4, 10, 10);
   ctx2.fillStyle = "#c0c0c0";
