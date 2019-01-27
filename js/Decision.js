@@ -1,164 +1,398 @@
-var dt = function() {
-  function n(b) {
-    var c = v,
-      e = b.trainingSet,
-      d = b.ignoredAttributes,
-      a = {};
-    if (d)
-      for (var f in d) a[d[f]] = !0;
-    this.root = c({
-      trainingSet: e,
-      ignoredAttributes: a,
-      categoryAttr: b.categoryAttr || "category",
-      minItemsCount: b.minItemsCount || 1,
-      entropyThrehold: b.entropyThrehold || 0.01,
-      maxTreeDepth: b.maxTreeDepth || 70
-    })
-  }
-
-  function p(b, c) {
-    for (var e = b.trainingSet, d = [], a = 0; a < c; a++) d[a] = [];
-    for (a = e.length - 1; 0 <= a; a--) d[a % c].push(e[a]);
-    e = [];
-    for (a = 0; a < c; a++) {
-      b.trainingSet = d[a];
-      var f = new n(b);
-      e.push(f)
+var dt = (function () {
+          
+    /**
+     * Creates an instance of DecisionTree
+     *
+     * @constructor
+     * @param builder - contains training set and
+     *                  some configuration parameters
+     */
+    function DecisionTree(builder) {        
+        this.root = buildDecisionTree({
+            trainingSet: builder.trainingSet,
+            ignoredAttributes: arrayToHashSet(builder.ignoredAttributes),
+            categoryAttr: builder.categoryAttr || 'category',
+            minItemsCount: builder.minItemsCount || 1,
+            entropyThrehold: builder.entropyThrehold || 0.01,
+            maxTreeDepth: builder.maxTreeDepth || 70
+        });
     }
-    this.trees = e
-  }
+          
+    DecisionTree.prototype.predict = function (item) {
+        return predict(this.root, item);
+    }
 
-  function q(b,
-    c) {
-    for (var e = {}, d = b.length - 1; 0 <= d; d--) e[b[d][c]] = 0;
-    for (d = b.length - 1; 0 <= d; d--) e[b[d][c]] += 1;
-    return e
-  }
+    /**
+     * Creates an instance of RandomForest
+     * with specific number of trees
+     *
+     * @constructor
+     * @param builder - contains training set and some
+     *                  configuration parameters for
+     *                  building decision trees
+     */
+    function RandomForest(builder, treesNumber) {
+        this.trees = buildRandomForest(builder, treesNumber);
+    }
+          
+    RandomForest.prototype.predict = function (item) {
+        return predictRandomForest(this.trees, item);
+    }
+    
+    /**
+     * Transforming array to object with such attributes 
+     * as elements of array (afterwards it can be used as HashSet)
+     */
+    function arrayToHashSet(array) {
+        var hashSet = {};
+        if (array) {
+            for(var i in array) {
+                var attr = array[i];
+                hashSet[attr] = true;
+            }
+        }
+        return hashSet;
+    }
+    
+    /**
+     * Calculating how many objects have the same 
+     * values of specific attribute.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
+    function countUniqueValues(items, attr) {
+        var counter = {};
 
-  function w(b, c) {
-    var e = q(b, c),
-      d = 0,
-      a, f;
-    for (f in e) a = e[f] / b.length, d += -a * Math.log(a);
-    return d
-  }
+        // detecting different values of attribute
+        for (var i = items.length - 1; i >= 0; i--) {
+            // items[i][attr] - value of attribute
+            counter[items[i][attr]] = 0;
+        }
+          
+        // counting number of occurrences of each of values
+        // of attribute
+        for (var i = items.length - 1; i >= 0; i--) {
+            counter[items[i][attr]] += 1;
+        }
 
-  function x(b, c) {
-    var e = q(b, c),
-      d = 0,
-      a, f;
-    for (f in e) e[f] > d && (d = e[f], a = f);
-    return a
-  }
+        return counter;
+    }
+    
+    /**
+     * Calculating entropy of array of objects 
+     * by specific attribute.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
+    function entropy(items, attr) {
+        // counting number of occurrences of each of values
+        // of attribute
+        var counter = countUniqueValues(items, attr);
 
-  function v(b) {
-    var c = b.trainingSet,
-      e = b.minItemsCount,
-      d = b.categoryAttr,
-      a = b.entropyThrehold,
-      f = b.maxTreeDepth,
-      n = b.ignoredAttributes;
-    if (0 == f || c.length <= e) return {
-      category: x(c, d)
+        var entropy = 0;
+        var p;
+        for (var i in counter) {
+            p = counter[i] / items.length;
+            entropy += -p * Math.log(p);
+        }
+
+        return entropy;
+    }
+          
+    /**
+     * Splitting array of objects by value of specific attribute, 
+     * using specific predicate and pivot.
+     *
+     * Items which matched by predicate will be copied to 
+     * the new array called 'match', and the rest of the items 
+     * will be copied to array with name 'notMatch'
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute,
+     *                which embedded in each object
+     *
+     * @param predicate - function(x, y) 
+     *                    which returns 'true' or 'false'
+     *
+     * @param pivot - used as the second argument when 
+     *                calling predicate function:
+     *                e.g. predicate(item[attr], pivot)
+     */
+    function split(items, attr, predicate, pivot) {
+        var match = [];
+        var notMatch = [];
+
+        var item,
+            attrValue;
+          
+        for (var i = items.length - 1; i >= 0; i--) {
+            item = items[i];
+            attrValue = item[attr];
+
+            if (predicate(attrValue, pivot)) {
+                match.push(item);
+            } else {
+                notMatch.push(item);
+            }
+        };
+
+        return {
+            match: match,
+            notMatch: notMatch
+        };
+    }
+
+    /**
+     * Finding value of specific attribute which is most frequent
+     * in given array of objects.
+     *
+     * @param items - array of objects
+     *
+     * @param attr  - variable with name of attribute, 
+     *                which embedded in each object
+     */
+    function mostFrequentValue(items, attr) {
+        // counting number of occurrences of each of values
+        // of attribute
+        var counter = countUniqueValues(items, attr);
+
+        var mostFrequentCount = 0;
+        var mostFrequentValue;
+
+        for (var value in counter) {
+            if (counter[value] > mostFrequentCount) {
+                mostFrequentCount = counter[value];
+                mostFrequentValue = value;
+            }
+        };
+
+        return mostFrequentValue;
+    }
+          
+    var predicates = {
+        '==': function (a, b) { return a == b },
+        '>=': function (a, b) { return a >= b }
     };
-    e = w(c, d);
-    if (e <= a) return {
-      category: x(c, d)
-    };
-    for (var m = {}, a = {
-          gain: 0
-        },
-        y = c.length - 1; 0 <= y; y--) {
-      var p = c[y],
-        k;
-      for (k in p)
-        if (k != d && !n[k]) {
-          var s = p[k],
-            t;
-          t = "number" == typeof s ? ">=" : "==";
-          var r = k + t + s;
-          if (!m[r]) {
-            m[r] = !0;
-            var r = D[t],
-              g;
-            g = c;
-            for (var l = k, z = r, h = s, q = [], B = [], u = void 0, C = void 0, A = g.length - 1; 0 <= A; A--) u = g[A], C = u[l], z(C, h) ? q.push(u) : B.push(u);
-            g = {
-              match: q,
-              notMatch: B
+
+    /**
+     * Function for building decision tree
+     */
+    function buildDecisionTree(builder) {
+
+        var trainingSet = builder.trainingSet;
+        var minItemsCount = builder.minItemsCount;
+        var categoryAttr = builder.categoryAttr;
+        var entropyThrehold = builder.entropyThrehold;
+        var maxTreeDepth = builder.maxTreeDepth;
+        var ignoredAttributes = builder.ignoredAttributes;
+
+        if ((maxTreeDepth == 0) || (trainingSet.length <= minItemsCount)) {
+            // restriction by maximal depth of tree
+            // or size of training set is to small
+            // so we have to terminate process of building tree
+            return {
+                category: mostFrequentValue(trainingSet, categoryAttr)
             };
-            l = w(g.match, d);
-            z = w(g.notMatch, d);
-            h = 0;
-            h += l * g.match.length;
-            h += z * g.notMatch.length;
-            h /= c.length;
-            l = e - h;
-            l > a.gain && (a = g, a.predicateName = t, a.predicate = r, a.attribute = k, a.pivot = s, a.gain = l)
-          }
+        }
+
+        var initialEntropy = entropy(trainingSet, categoryAttr);
+
+        if (initialEntropy <= entropyThrehold) {
+            // entropy of training set too small
+            // (it means that training set is almost homogeneous),
+            // so we have to terminate process of building tree
+            return {
+                category: mostFrequentValue(trainingSet, categoryAttr)
+            };
+        }
+
+        // used as hash-set for avoiding the checking of split by rules
+        // with the same 'attribute-predicate-pivot' more than once
+        var alreadyChecked = {};
+          
+        // this variable expected to contain rule, which splits training set
+        // into subsets with smaller values of entropy (produces informational gain)
+        var bestSplit = {gain: 0};
+
+        for (var i = trainingSet.length - 1; i >= 0; i--) {
+            var item = trainingSet[i];
+
+            // iterating over all attributes of item
+            for (var attr in item) {
+                if ((attr == categoryAttr) || ignoredAttributes[attr]) {
+                    continue;
+                }
+
+                // let the value of current attribute be the pivot
+                var pivot = item[attr];
+
+                // pick the predicate
+                // depending on the type of the attribute value
+                var predicateName;
+                if (typeof pivot == 'number') {
+                    predicateName = '>=';
+                } else {
+                    // there is no sense to compare non-numeric attributes
+                    // so we will check only equality of such attributes
+                    predicateName = '==';
+                }
+
+                var attrPredPivot = attr + predicateName + pivot;
+                if (alreadyChecked[attrPredPivot]) {
+                    // skip such pairs of 'attribute-predicate-pivot',
+                    // which been already checked
+                    continue;
+                }
+                alreadyChecked[attrPredPivot] = true;
+
+                var predicate = predicates[predicateName];
+          
+                // splitting training set by given 'attribute-predicate-value'
+                var currSplit = split(trainingSet, attr, predicate, pivot);
+
+                // calculating entropy of subsets
+                var matchEntropy = entropy(currSplit.match, categoryAttr);
+                var notMatchEntropy = entropy(currSplit.notMatch, categoryAttr);
+
+                // calculating informational gain
+                var newEntropy = 0;
+                newEntropy += matchEntropy * currSplit.match.length;
+                newEntropy += notMatchEntropy * currSplit.notMatch.length;
+                newEntropy /= trainingSet.length;
+                var currGain = initialEntropy - newEntropy;
+
+                if (currGain > bestSplit.gain) {
+                    // remember pairs 'attribute-predicate-value'
+                    // which provides informational gain
+                    bestSplit = currSplit;
+                    bestSplit.predicateName = predicateName;
+                    bestSplit.predicate = predicate;
+                    bestSplit.attribute = attr;
+                    bestSplit.pivot = pivot;
+                    bestSplit.gain = currGain;
+                }
+            }
+        }
+
+        if (!bestSplit.gain) {
+            // can't find optimal split
+            return { category: mostFrequentValue(trainingSet, categoryAttr) };
+        }
+
+        // building subtrees
+          
+        builder.maxTreeDepth = maxTreeDepth - 1;
+
+        builder.trainingSet = bestSplit.match;
+        var matchSubTree = buildDecisionTree(builder);
+
+        builder.trainingSet = bestSplit.notMatch;
+        var notMatchSubTree = buildDecisionTree(builder);
+
+        return {
+            attribute: bestSplit.attribute,
+            predicate: bestSplit.predicate,
+            predicateName: bestSplit.predicateName,
+            pivot: bestSplit.pivot,
+            match: matchSubTree,
+            notMatch: notMatchSubTree,
+            matchedCount: bestSplit.match.length,
+            notMatchedCount: bestSplit.notMatch.length
+        };
+    }
+
+    /**
+     * Classifying item, using decision tree
+     */
+    function predict(tree, item) {
+        var attr,
+            value,
+            predicate,
+            pivot;
+        
+        // Traversing tree from the root to leaf
+        while(true) {
+          
+            if (tree.category) {
+                // only leafs contains predicted category
+                return tree.category;
+            }
+
+            attr = tree.attribute;
+            value = item[attr];
+
+            predicate = tree.predicate;
+            pivot = tree.pivot;
+
+            // move to one of subtrees
+            if (predicate(value, pivot)) {
+                tree = tree.match;
+            } else {
+                tree = tree.notMatch;
+            }
         }
     }
-    if (!a.gain) return {
-      category: x(c, d)
-    };
-    b.maxTreeDepth = f - 1;
-    b.trainingSet = a.match;
-    c = v(b);
-    b.trainingSet = a.notMatch;
-    b = v(b);
-    return {
-      attribute: a.attribute,
-      predicate: a.predicate,
-      predicateName: a.predicateName,
-      pivot: a.pivot,
-      match: c,
-      notMatch: b,
-      matchedCount: a.match.length,
-      notMatchedCount: a.notMatch.length
-    }
-  }
-  n.prototype.predict = function(b) {
-    a: {
-      for (var c = this.root, e, d, a;;) {
-        if (c.category) {
-          b = c.category;
-          break a
+
+    /**
+     * Building array of decision trees
+     */
+    function buildRandomForest(builder, treesNumber) {
+        var items = builder.trainingSet;
+          
+        // creating training sets for each tree
+        var trainingSets = [];
+        for (var t = 0; t < treesNumber; t++) {
+            trainingSets[t] = [];
         }
-        e = c.attribute;
-        e = b[e];
-        d = c.predicate;
-        a = c.pivot;
-        c = d(e, a) ? c.match : c.notMatch
-      }
-      b = void 0
+        for (var i = items.length - 1; i >= 0 ; i--) {
+          // assigning items to training sets of each tree
+          // using 'round-robin' strategy
+          var correspondingTree = i % treesNumber;
+          trainingSets[correspondingTree].push(items[i]);
+        }
+
+        // building decision trees
+        var forest = [];
+        for (var t = 0; t < treesNumber; t++) {
+            builder.trainingSet = trainingSets[t];
+
+            var tree = new DecisionTree(builder);
+            forest.push(tree);
+        }
+        return forest;
     }
-    return b
-  };
-  p.prototype.predict = function(b) {
-    var c = this.trees,
-      e = {},
-      d;
-    for (d in c) {
-      var a = c[d].predict(b);
-      e[a] = e[a] ? e[a] + 1 : 1
+
+    /**
+     * Each of decision tree classifying item
+     * ('voting' that item corresponds to some class).
+     *
+     * This function returns hash, which contains 
+     * all classifying results, and number of votes 
+     * which were given for each of classifying results
+     */
+    function predictRandomForest(forest, item) {
+        var result = {};
+        for (var i in forest) {
+            var tree = forest[i];
+            var prediction = tree.predict(item);
+            result[prediction] = result[prediction] ? result[prediction] + 1 : 1;
+        }
+        return result;
     }
-    return e
-  };
-  var D = {
-      "==": function(b, c) {
-        return b == c
-      },
-      ">=": function(b, c) {
-        return b >= c
-      }
-    },
-    m = {};
-  m.DecisionTree = n;
-  m.RandomForest = p;
-  return m
-}();
-// feed and get
-function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz) {
+
+    var exports = {};
+    exports.DecisionTree = DecisionTree;
+    exports.RandomForest = RandomForest;
+    return exports;
+})();// feed and get
+function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ) {
   var test = {
     roslina: ros,
     nawodnienie: nawod,
@@ -167,16 +401,11 @@ function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz) {
     poziom_stresu: stres,
     chwasty: chwast,
     wiek: wiek,
-    dojrzala: dojrz
+    dojrzala: dojrz,
+	typ: typ
   };
-
-  var decisionTreePrediction = decisionTree.predict(test);
-
-  // Displaying predictions - to mozesz wywalic
-  var item = JSON.stringify(test, null, 0);
-  document.getElementById('testingItem').innerHTML = item;
-  var decision = JSON.stringify(decisionTreePrediction, null, 0);
-  document.getElementById('decisionTreePrediction').innerHTML = decision;
+  
+  var decision = decisionTree.predict(test);
   if (decision == "tak") {
     return true;
   } else {
@@ -185,7 +414,7 @@ function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz) {
 }
 // Training set
 var data = [{
-    roslina: 'Paproc',
+    roslina: 'Koperek',
     nawodnienie: 0.9,
     naslonecznienie: 0.3,
     nawoz: 0.1,
@@ -193,10 +422,12 @@ var data = [{
     chwasty: 'nie',
     wiek: 15,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
+	
   },
   {
-    roslina: 'Paproc',
+    roslina: 'Koperek',
     nawodnienie: 0.3,
     naslonecznienie: 0.9,
     nawoz: 0.2,
@@ -204,10 +435,11 @@ var data = [{
     chwasty: 'nie',
     wiek: 30,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
-    roslina: 'Paproc',
+    roslina: 'Koperek',
     nawodnienie: 0.9,
     naslonecznienie: 0.5,
     nawoz: 0.7,
@@ -215,10 +447,11 @@ var data = [{
     chwasty: 'nie',
     wiek: 11,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
-    roslina: 'Paproc',
+    roslina: 'Koperek',
     nawodnienie: 0.7,
     naslonecznienie: 0.5,
     nawoz: 0.7,
@@ -226,7 +459,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Papryka',
@@ -237,7 +471,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 13,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Papryka',
@@ -248,7 +483,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 32,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Papryka',
@@ -259,7 +495,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Papryka',
@@ -270,7 +507,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Ogorek',
@@ -281,7 +519,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 14,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Ogorek',
@@ -292,7 +531,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 33,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Ogorek',
@@ -303,7 +543,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Ogorek',
@@ -314,7 +555,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 19,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Pomidor',
@@ -325,7 +567,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 1,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Pomidor',
@@ -336,7 +579,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 34,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Pomidor',
@@ -347,7 +591,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 2,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Pomidor',
@@ -358,7 +603,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 33,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Cebula',
@@ -369,7 +615,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 32,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Cebula',
@@ -380,7 +627,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 18,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Cebula',
@@ -391,7 +639,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 30,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Cebula',
@@ -402,7 +651,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 24,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Żyto',
@@ -413,7 +663,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'żniwa'
   },
   {
     roslina: 'Żyto',
@@ -424,7 +675,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 17,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'żniwa'
   },
   {
     roslina: 'Żyto',
@@ -435,7 +687,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 14,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'żniwa'
   },
   {
     roslina: 'Żyto',
@@ -446,7 +699,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 30,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'żniwa'
   },
   {
     roslina: 'Ziemniaki',
@@ -457,7 +711,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Ziemniaki',
@@ -468,7 +723,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 38,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Ziemniaki',
@@ -479,7 +735,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 10,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Ziemniaki',
@@ -490,7 +747,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 10,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Sałata',
@@ -501,7 +759,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 30,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Sałata',
@@ -512,7 +771,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 7,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Sałata',
@@ -523,7 +783,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Sałata',
@@ -534,7 +795,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 20,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Burak',
@@ -545,7 +807,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 36,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Burak',
@@ -556,7 +819,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Burak',
@@ -567,7 +831,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Burak',
@@ -578,7 +843,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Marchew',
@@ -589,7 +855,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Marchew',
@@ -600,7 +867,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Marchew',
@@ -611,7 +879,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Marchew',
@@ -622,7 +891,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Pietruszka',
@@ -633,7 +903,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Pietruszka',
@@ -644,7 +915,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Pietruszka',
@@ -655,7 +927,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 38,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Pietruszka',
@@ -666,7 +939,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Fasola',
@@ -677,7 +951,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Fasola',
@@ -688,7 +963,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Fasola',
@@ -699,7 +975,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'niw',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Fasola',
@@ -710,7 +987,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 34,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Kukurydza',
@@ -721,7 +999,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kukurydza',
@@ -732,7 +1011,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kukurydza',
@@ -743,7 +1023,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kukurydza',
@@ -754,7 +1035,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 37,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Groszek',
@@ -765,7 +1047,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Groszek',
@@ -776,7 +1059,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'krzak'
   },
   {
     roslina: 'Groszek',
@@ -787,7 +1071,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 30,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Groszek',
@@ -798,7 +1083,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'krzak'
   },
   {
     roslina: 'Kapusta',
@@ -809,7 +1095,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kapusta',
@@ -820,7 +1107,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kapusta',
@@ -831,7 +1119,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Kapusta',
@@ -842,7 +1131,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 31,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'zrywane'
   },
   {
     roslina: 'Chrzan',
@@ -853,7 +1143,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 26,
     dojrzala: 'tak',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Chrzan',
@@ -864,7 +1155,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 9,
     dojrzala: 'nie',
-    warta_uwagi: 'nie'
+    warta_uwagi: 'nie',
+	typ: 'kopane'
   },
   {
     roslina: 'Chrzan',
@@ -875,7 +1167,8 @@ var data = [{
     chwasty: 'nie',
     wiek: 28,
     dojrzala: 'nie',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   },
   {
     roslina: 'Chrzan',
@@ -886,7 +1179,8 @@ var data = [{
     chwasty: 'tak',
     wiek: 36,
     dojrzala: 'tak',
-    warta_uwagi: 'tak'
+    warta_uwagi: 'tak',
+	typ: 'kopane'
   }
 ];
 
@@ -896,7 +1190,8 @@ var config = {
   categoryAttr: 'warta_uwagi',
   ignoredAttributes: ['roslina']
 };
-
+var types = ['kopane','zrywane','krzak','żniwa'];
+var d = ['tak','nie'];
 // Building Decision Tree
 var decisionTree = new dt.DecisionTree(config);
 
@@ -907,10 +1202,6 @@ var nawoz = Math.random();
 var stres = Math.random();
 var chwast = "tak";
 var wiek = Math.floor(Math.random() * 41);
-var dojrz = "";
-if (wiek >= 30) {
-  dojrz = "tak";
-} else {
-  dojrz = "nie";
-}
-var a = getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz);
+var typ = types[Math.floor(Math.random()*types.length)];
+var dojrz = d[Math.floor(Math.random()*d.length)];
+var a = getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ);
