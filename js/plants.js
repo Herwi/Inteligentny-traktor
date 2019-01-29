@@ -4,16 +4,22 @@ let plantsReady = false;
 class Plant {
   constructor(roslina) {
     this.roslina = roslina;
-    this.nawodnienie = Math.floor((Math.random())*10)/10;
-    this.naslonecznienie = Math.floor((Math.random())*10)/10;
-    this.poziom_stresu = Math.floor((Math.random())*10)/10;
+    //this.nawodnienie = Math.floor((Math.random())*10)/10;
+    //this.naslonecznienie = Math.floor((Math.random())*10)/10;
+    //this.poziom_stresu = Math.floor((Math.random())*10)/10;
+    this.nawodnienie = 0.9;
+    this.naslonecznienie = 0.3;
+    this.nawoz = 0.1;
+    this.poziom_stresu = 0.7;
     if(Math.round((Math.random())) == 0) {
-      this.chwast = 'nie';
+      this.chwasty = 'nie';
     }
     else {
-      this.chwast = 'tak';
+      this.chwasty = 'tak';
     }
-    this.wiek = Math.round(Math.random()*10) + 1;
+    //this.wiek = Math.round(Math.random()*10) + 1;
+    //this.dojrzala = 'nie';
+    this.wiek = 15;
     this.dojrzala = 'nie';
   }
 }

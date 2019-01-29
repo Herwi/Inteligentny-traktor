@@ -48,7 +48,7 @@ $( document ).ready(function () {
   for(let i = 0; i < 50; i++) {
     for(let j = 0; j < 50; j++) {
       let r = Math.floor((Math.random() * 100) + 1);
-      if(r <= 10) {
+      if(r <= 3) {
         for(let x = i*5; x < (i + 1) * 5; x++) {
           for(let y = j*5; y < (j + 1) * 5; y++) {
             //console.log("graph x:" + x + "(" + (i*10) + "," + ((i + 1) * 10) + ") y: " + y + "(" + (j*10) + "," + ((j + 1) * 10) + ")");
