@@ -38,7 +38,7 @@ header {
 /* Container for flexboxes */
 section {
   display: -webkit-flex;
-dispalt: flex;
+  display: flex;
 }
 
 /* Style the navigation menu */
@@ -63,7 +63,7 @@ article {
   flex: 3;
   background-color: #FFFFFF;
   text-align: center;
-  padding: 10px;
+  padding: 25px;
 
 /* Style the footer */
 footer {
@@ -96,9 +96,10 @@ footer {
   <div id="" style="position: relative; ">Aktualna pozycja: </div>
   <div id="position" style="position: relative; ">x: 2 y: 2</div>
   <div id="day" style="position: relative; ">Dzien: </div>
-  <li> <button id="buttony" style="position: relative; "><a onclick="BFS(graph, pos);">Pracuj</a></button></li>
-  <button id="buttony" style="position: relative; "<a onclick="zaktualizujRosliny();">Kolejny dzień</a></button>
-  <li><input type="button" value="NOWA GRA" onClick="location.reload();" /></li>
+  <br />
+  <li><button id="buttony" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;"><a onclick="">Start</a></button></li>
+  <li><br /></li>
+  <li><input type="button" value="Od początku" onClick="location.reload();" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;" /></li>
   
     </ul>
   </nav>
