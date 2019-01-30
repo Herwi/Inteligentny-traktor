@@ -15,6 +15,9 @@ let ctx2 = null;
 let canvas3 = null;
 let ctx3 = null;
 
+let canvasR = null;
+let ctxR = null;
+
 
 let dzien = 0;
 // 0 - dół
@@ -215,6 +218,12 @@ function goToPos(x, y, callback) {
   goThroughPath(astar.search(graph, {x: pos.x, y: pos.y}, {x,y}), callback);
 }
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -227,4 +236,11 @@ function taskUpdate(s) {
 
 function dayUpdate() {
   $('#day').html('Dzien: ' + dzien);
+}
+
+function start() {
+  setInterval(function() {
+    zaktualizujRosliny();
+  }, 15000);
+  BFS(graph, pos);
 }

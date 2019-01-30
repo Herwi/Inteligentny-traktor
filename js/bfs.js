@@ -68,12 +68,20 @@ function BFS(g, s) {
         let priotytet = getPriority(aktualny.plant);
         console.log(priotytet);
         if(priotytet) {
-          goToPos(aktualny.x, aktualny.y, function() { zadbaj(aktualny); });
+          goToPos(aktualny.x, aktualny.y, function() {
+            zadbaj(aktualny);
+            setTimeout(function () {
+              BFS(graph, pos);
+            }, 100);
+          });
           return;
         }
       }
     }
   }
   taskUpdate("Zadna z roslin nie wymaga uwagi");
+  setTimeout(function () {
+    BFS(graph, pos);
+  }, 1000);
   console.log("wyszlo");
 }

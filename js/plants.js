@@ -17,9 +17,9 @@ class Plant {
     else {
       this.chwasty = 'tak';
     }
-    //this.wiek = Math.round(Math.random()*10) + 1;
+    this.wiek = Math.round(Math.random()*10) + 1;
     //this.dojrzala = 'nie';
-    this.wiek = 0;
+    //this.wiek = 0;
     this.dojrzala = 'nie';
 	  this.typ = typ;
   }
@@ -68,13 +68,29 @@ function zaktualizujRosliny(){
   });*/
 }
 
+let roslinki = [
+  {nazwa: 'Koperek', typ: 'zrywane'},
+  {nazwa: 'Papryka', typ: 'krzak'},
+  {nazwa: 'Ogorek', typ: 'kopane'},
+  {nazwa: 'Pomidor', typ: 'krzak'},
+  {nazwa: 'Cebula', typ: 'kopane'},
+  {nazwa: 'Zyto', typ: 'zniwa'},
+  {nazwa: 'Ziemniaki', typ: 'kopane'},
+  {nazwa: 'Salata', typ: 'zrywane'},
+  {nazwa: 'Burak', typ: 'kopane'},
+  {nazwa: 'Marchew', typ: 'kopane'},
+  {nazwa: 'Pietruszka', typ: 'kopane'},
+  {nazwa: 'Fasola', typ: 'krzak'},
+  {nazwa: 'Kukurydza', typ: 'zrywane'},
+  {nazwa: 'Groszek', typ: 'krzak'},
+  {nazwa: 'Kapusta', typ: 'zrywane'},
+  {nazwa: 'Chrzan', typ: 'kopane'}
+]
+
 function rozstawRosliny() {
-  for(let i = 0; i < 3; i++) {
-    plants.push(new Plant('Ogorek', 'kopane'));
-    plants.push(new Plant('Pomidor', 'krzak'));
-    plants.push(new Plant('Cebula', 'kopane'));
-    plants.push(new Plant('Zyto', 'zniwa'));
-    plants.push(new Plant('Ziemniaki', 'kopane'));
+  for(let i = 0; i < 20; i++) {
+    let a = getRandomInt(0, roslinki.length);
+    plants.push(new Plant(roslinki[a].nazwa, roslinki[a].typ));
   }
   for(let i in plants) {
     let x = Math.floor(Math.random() * 16);
@@ -100,9 +116,7 @@ function rozstawRosliny() {
   plants[plants.length-1].wiek = 1;
   console.log("ROZSTAWIONE");
   drawMap();
-  setInterval(function() {
-    zaktualizujRosliny();
-  }, 15000);
+
 }
 
 function getPlantImage(ros) {
@@ -121,6 +135,36 @@ function getPlantImage(ros) {
       break;
     case "Ziemniaki":
       return ziemniaki;
+      break;
+    case "Chrzan":
+      return chrzan;
+      break;
+    case "Fasola":
+      return fasola;
+      break;
+    case "Groszek":
+      return groszek;
+      break;
+    case "Kapusta":
+      return kapusta;
+      break;
+    case "Koperek":
+      return koperek;
+      break;
+    case "Kukurydza":
+      return kukurydza;
+      break;
+    case "Marchew":
+      return marchew;
+      break;
+    case "Papryka":
+      return papryka;
+      break;
+    case "Pietruszka":
+      return pietruszka;
+      break;
+    case "Salata":
+      return salata;
       break;
     default:
       return null;
@@ -155,6 +199,11 @@ function zadbaj(pole){
       plant.chwast = 'tak';
       console.log("Roslina pozbawiona chwastow");
     }, 10);
+  }
+
+  if(plant.wiek >= 30) {
+    pole.plant = null;
+    ctxR.clearRect(pole.x*32, pole.y*32, 32, 32);
   }
 
 }
