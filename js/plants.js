@@ -124,7 +124,6 @@ function getPlantImage(ros) {
       return null;
   }
 }
-
 function zadbaj(plant){
   console.log("zaczynam dbac o roslinke: " + plant.roslina + "/" + plant.x + "/" + plant.y);
   if(plant.nawodnienie < 1){
