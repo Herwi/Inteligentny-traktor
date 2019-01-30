@@ -92,7 +92,7 @@ $( document ).ready(function () {
     }
   }
   console.log("LOADED");
-  //rozstawRosliny();
+  rozstawRosliny();
   drawMap();
 });
 
