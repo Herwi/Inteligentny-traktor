@@ -14,13 +14,15 @@
 </head>
 <body>
   <div style="position: relative;">
-   <canvas id="layer1" width="500" height="500"
+   <canvas id="layer1" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 0; background:transparent;"></canvas>
-   <canvas id="layer2" width="500" height="500"
+   <canvas id="layer2" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 1; background:transparent;"></canvas>
-   <canvas id="layer3" width="500" height="500"
+   <canvas id="layer3" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 2; background:transparent;"></canvas>
   </div>
-  <div id="position" style="position: relative; left: 510px; width: 200px; height: 20px;">x: y: </div>
-  <div id="task" style="position: relative; left: 510px; top: 20px; width: 200px; height: 20px;">Task: </div>
+  <div id="position" style="position: relative; left: 520px; width: 200px; height: 20px;">x: y: </div>
+  <div id="task" style="position: relative; left: 520px; top: 20px; width: 200px; height: 20px;">Task: </div>
+  <div id="buttony" style="position: relative; left: 520px; top: 35px; width: 200px; height: 20px;"><a onclick="BFS(graph, pos);">BFS</a>
+  <a onclick="zaktualizujRosliny();">Aktualizuj</a></div>
 </body>

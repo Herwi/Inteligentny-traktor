@@ -30,14 +30,14 @@ function BFS(g, s) {
   if(g[s.x] && g[s.x][s.y+3] && !g[s.x][s.y+3].odwiedzony) {
       kolejka.push(g[s.x][s.y+3]);
   }
-  kolejka.pop().odwiedzony = true;
+  kolejka.shift().odwiedzony = true;
 
   let i = 0;
 
   while(kolejka.length) {
-    //console.log(i++);
+    console.log(i++);
     //console.log("aaa");
-    let aktualny = kolejka.pop();
+    let aktualny = kolejka.shift();
     if(g[aktualny.x-3] && g[aktualny.x-3][aktualny.y] && !g[aktualny.x-3][aktualny.y].odwiedzony) {
         kolejka.push(g[aktualny.x-3][aktualny.y]);
     }

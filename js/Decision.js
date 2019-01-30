@@ -1,5 +1,5 @@
 var dt = (function () {
-          
+
     /**
      * Creates an instance of DecisionTree
      *
@@ -7,7 +7,7 @@ var dt = (function () {
      * @param builder - contains training set and
      *                  some configuration parameters
      */
-    function DecisionTree(builder) {        
+    function DecisionTree(builder) {
         this.root = buildDecisionTree({
             trainingSet: builder.trainingSet,
             ignoredAttributes: arrayToHashSet(builder.ignoredAttributes),
@@ -17,7 +17,7 @@ var dt = (function () {
             maxTreeDepth: builder.maxTreeDepth || 70
         });
     }
-          
+
     DecisionTree.prototype.predict = function (item) {
         return predict(this.root, item);
     }
@@ -34,13 +34,13 @@ var dt = (function () {
     function RandomForest(builder, treesNumber) {
         this.trees = buildRandomForest(builder, treesNumber);
     }
-          
+
     RandomForest.prototype.predict = function (item) {
         return predictRandomForest(this.trees, item);
     }
-    
+
     /**
-     * Transforming array to object with such attributes 
+     * Transforming array to object with such attributes
      * as elements of array (afterwards it can be used as HashSet)
      */
     function arrayToHashSet(array) {
@@ -53,14 +53,14 @@ var dt = (function () {
         }
         return hashSet;
     }
-    
+
     /**
-     * Calculating how many objects have the same 
+     * Calculating how many objects have the same
      * values of specific attribute.
      *
      * @param items - array of objects
      *
-     * @param attr  - variable with name of attribute, 
+     * @param attr  - variable with name of attribute,
      *                which embedded in each object
      */
     function countUniqueValues(items, attr) {
@@ -71,7 +71,7 @@ var dt = (function () {
             // items[i][attr] - value of attribute
             counter[items[i][attr]] = 0;
         }
-          
+
         // counting number of occurrences of each of values
         // of attribute
         for (var i = items.length - 1; i >= 0; i--) {
@@ -80,14 +80,14 @@ var dt = (function () {
 
         return counter;
     }
-    
+
     /**
-     * Calculating entropy of array of objects 
+     * Calculating entropy of array of objects
      * by specific attribute.
      *
      * @param items - array of objects
      *
-     * @param attr  - variable with name of attribute, 
+     * @param attr  - variable with name of attribute,
      *                which embedded in each object
      */
     function entropy(items, attr) {
@@ -104,13 +104,13 @@ var dt = (function () {
 
         return entropy;
     }
-          
+
     /**
-     * Splitting array of objects by value of specific attribute, 
+     * Splitting array of objects by value of specific attribute,
      * using specific predicate and pivot.
      *
-     * Items which matched by predicate will be copied to 
-     * the new array called 'match', and the rest of the items 
+     * Items which matched by predicate will be copied to
+     * the new array called 'match', and the rest of the items
      * will be copied to array with name 'notMatch'
      *
      * @param items - array of objects
@@ -118,10 +118,10 @@ var dt = (function () {
      * @param attr  - variable with name of attribute,
      *                which embedded in each object
      *
-     * @param predicate - function(x, y) 
+     * @param predicate - function(x, y)
      *                    which returns 'true' or 'false'
      *
-     * @param pivot - used as the second argument when 
+     * @param pivot - used as the second argument when
      *                calling predicate function:
      *                e.g. predicate(item[attr], pivot)
      */
@@ -131,7 +131,7 @@ var dt = (function () {
 
         var item,
             attrValue;
-          
+
         for (var i = items.length - 1; i >= 0; i--) {
             item = items[i];
             attrValue = item[attr];
@@ -155,7 +155,7 @@ var dt = (function () {
      *
      * @param items - array of objects
      *
-     * @param attr  - variable with name of attribute, 
+     * @param attr  - variable with name of attribute,
      *                which embedded in each object
      */
     function mostFrequentValue(items, attr) {
@@ -175,7 +175,7 @@ var dt = (function () {
 
         return mostFrequentValue;
     }
-          
+
     var predicates = {
         '==': function (a, b) { return a == b },
         '>=': function (a, b) { return a >= b }
@@ -216,7 +216,7 @@ var dt = (function () {
         // used as hash-set for avoiding the checking of split by rules
         // with the same 'attribute-predicate-pivot' more than once
         var alreadyChecked = {};
-          
+
         // this variable expected to contain rule, which splits training set
         // into subsets with smaller values of entropy (produces informational gain)
         var bestSplit = {gain: 0};
@@ -253,7 +253,7 @@ var dt = (function () {
                 alreadyChecked[attrPredPivot] = true;
 
                 var predicate = predicates[predicateName];
-          
+
                 // splitting training set by given 'attribute-predicate-value'
                 var currSplit = split(trainingSet, attr, predicate, pivot);
 
@@ -287,7 +287,7 @@ var dt = (function () {
         }
 
         // building subtrees
-          
+
         builder.maxTreeDepth = maxTreeDepth - 1;
 
         builder.trainingSet = bestSplit.match;
@@ -316,10 +316,10 @@ var dt = (function () {
             value,
             predicate,
             pivot;
-        
+
         // Traversing tree from the root to leaf
         while(true) {
-          
+
             if (tree.category) {
                 // only leafs contains predicted category
                 return tree.category;
@@ -345,7 +345,7 @@ var dt = (function () {
      */
     function buildRandomForest(builder, treesNumber) {
         var items = builder.trainingSet;
-          
+
         // creating training sets for each tree
         var trainingSets = [];
         for (var t = 0; t < treesNumber; t++) {
@@ -373,8 +373,8 @@ var dt = (function () {
      * Each of decision tree classifying item
      * ('voting' that item corresponds to some class).
      *
-     * This function returns hash, which contains 
-     * all classifying results, and number of votes 
+     * This function returns hash, which contains
+     * all classifying results, and number of votes
      * which were given for each of classifying results
      */
     function predictRandomForest(forest, item) {
@@ -392,8 +392,8 @@ var dt = (function () {
     exports.RandomForest = RandomForest;
     return exports;
 })();// feed and get
-function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ) {
-  var test = {
+function getPriority(plant) {
+  /*var test = {
     roslina: ros,
     nawodnienie: nawod,
     naslonecznienie: naslo,
@@ -403,8 +403,9 @@ function getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ) 
     wiek: wiek,
     dojrzala: dojrz,
 	typ: typ
-  };
-  
+};*/
+  var test = plant;
+
   var decision = decisionTree.predict(test);
   if (decision == "tak") {
     return true;
@@ -424,7 +425,7 @@ var data = [{
     dojrzala: 'nie',
     warta_uwagi: 'tak',
 	typ: 'zrywane'
-	
+
   },
   {
     roslina: 'Koperek',
@@ -1204,4 +1205,4 @@ var chwast = "tak";
 var wiek = Math.floor(Math.random() * 41);
 var typ = types[Math.floor(Math.random()*types.length)];
 var dojrz = d[Math.floor(Math.random()*d.length)];
-var a = getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ);
+//var a = getPriority(ros, nawod, naslo, nawoz, stres, chwast, wiek, dojrz, typ);

@@ -65,7 +65,7 @@ function zaktualizujRosliny(){
 }
 
 function rozstawRosliny() {
-  for(let i = 0; i < 3; i++) {
+  for(let i = 0; i < 10; i++) {
     plants.push(new Plant('Ogorek', 'kopane'));
     plants.push(new Plant('Pomidor', 'krzak'));
     plants.push(new Plant('Cebula', 'kopane'));
@@ -73,17 +73,22 @@ function rozstawRosliny() {
     plants.push(new Plant('Ziemniaki', 'kopane'));
   }
   for(let i in plants) {
-    let x = Math.floor(Math.random() * 16);
-    let y = Math.floor(Math.random() * 16);
+    let x = Math.floor(Math.random() * 50);
+    let y = Math.floor(Math.random() * 50);
     while(true) {
-      if(graph[x] && graph[x][y] && graph[x][y].color == null) {
-        graph[x][y].color = "#42f471";
-        graph[x][y].plant = plants[i];
+      if(graph[x*5] && graph[x*5][y*5] && graph[x*5][y*5].color == null) {
+        for(let x1 = x*5; x1 < (x + 1) * 5; x1++) {
+          for(let y1 = y*5; y1 < (y + 1) * 5; y1++) {
+            //console.log("graph x:" + x + "(" + (i*10) + "," + ((i + 1) * 10) + ") y: " + y + "(" + (j*10) + "," + ((j + 1) * 10) + ")");
+            graph[x1][y1].color = "#42f471";
+            graph[x1][y1].plant = plants[i];
+          }
+        }
         break;
       }
       else {
-        x = Math.floor(Math.random() * 16);
-        y = Math.floor(Math.random() * 16);
+        x = Math.floor(Math.random() * 50);
+        y = Math.floor(Math.random() * 50);
       }
     }
   }
