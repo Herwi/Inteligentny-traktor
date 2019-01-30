@@ -1,4 +1,5 @@
-<head>
+
+<!DOCTYPE html>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
   <script src="js/grafiki.js"></script>
   <script src="js/astar.js"></script>
@@ -6,25 +7,117 @@
   <script src="js/main.js"></script>
   <script src="js/bfs.js"></script>
   <script src="js/Decision.js"></script>
-  <style>
-    canvas {
-        border:1px solid #d3d3d3;
-        background-color: #f1f1f1;
+  <html lang="en">
+<head>
+<title>Inteligentny Traktor</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+canvas {
+        border:1px solid #000000;
+        background-color: #669966;
     }
-  </style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Style the header */
+header {
+  background-color: #CC9966;
+  padding: 2px;
+  text-align: center;
+  font-size: 20px;
+  color: white;
+}
+
+/* Container for flexboxes */
+section {
+  display: -webkit-flex;
+  display: flex;
+}
+
+/* Style the navigation menu */
+nav {
+  -webkit-flex: 1;
+  -ms-flex: 1;
+  flex: 1;
+  background: #ccc;
+  padding: 20px;
+}
+
+/* Style the list inside the menu */
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Style the content */
+article {
+  -webkit-flex: 3;
+  -ms-flex: 3;
+  flex: 3;
+  background-color: #FFFFFF;
+  text-align: center;
+  padding: 25px;
+
+/* Style the footer */
+footer {
+  background-color: #777;
+  padding: 10px;
+  text-align: center;
+  color: white;
+}
+
+/* Responsive layout - makes the two columns/boxes stack on top of each other instead of next to each other, on small screens */
+@media (max-width: 600px) {
+  nav, article {
+    width: 100%;
+    height: auto;
+  }
+}
+
+</style>
 </head>
 <body>
-  <div style="position: relative;">
-   <canvas id="layer1" width="512" height="512"
-     style="position: absolute; left: 0; top: 0; z-index: 0; background:transparent;"></canvas>
-   <canvas id="layer2" width="512" height="512"
+
+<header>
+  <h2>Inteligentny Traktor</h2>
+</header>
+
+<section>
+  <nav>
+    <ul>
+	
+  <div id="" style="position: relative; ">Aktualna pozycja: </div>
+  <div id="position" style="position: relative; ">x: 2 y: 2</div>
+  <div id="day" style="position: relative; ">Dzien: </div>
+  <br />
+  <li><button id="buttony" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;"><a onclick="">Start</a></button></li>
+  <li><br /></li>
+  <li><input type="button" value="Od początku" onClick="location.reload();" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;" /></li>
+  
+    </ul>
+  </nav>
+  
+  <article>
+    <div style="position: relative;">
+   <canvas id="layer1" width="500" height="500"
+     style="position: absolute; left: 0; top: 0; z-index: 0; background;"></canvas>
+   <canvas id="layer2" width="500" height="500"
      style="position: absolute; left: 0; top: 0; z-index: 1; background:transparent;"></canvas>
-   <canvas id="layer3" width="512" height="512"
+   <canvas id="layer3" width="500" height="500"
      style="position: absolute; left: 0; top: 0; z-index: 2; background:transparent;"></canvas>
   </div>
-  <div id="position" style="position: relative; left: 520px; width: 300px; height: 20px;">x: y: </div>
-  <div id="task" style="position: relative; left: 520px; top: 20px; width: 300px; height: 20px;">Task: </div>
-  <div id="buttony" style="position: relative; left: 520px; top: 35px; width: 300px; height: 20px;"><a onclick="BFS(graph, pos);">BFS</a>
-  <a onclick="zaktualizujRosliny();">Aktualizuj</a></div>
-  <div id="day" style="position: relative; left: 520px; top: 45px; width: 300px; height: 20px;">Dzien: </div>
+  </article>
+</section>
+
+<footer>
+</footer>
+
 </body>
+</html>
