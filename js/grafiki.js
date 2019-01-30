@@ -1,12 +1,16 @@
-let GRAFIKI = 8;
+let GRAFIKI = 15;
 
 let licznik = 0;
 
-let grass = new Image();
-grass.onload = function () {
-   licznik++;
+let grass = [];
+for(let i = 1; i <= 8; i++) {
+  let obj = new Image();
+  obj.onload = function () {
+     licznik++;
+  }
+  obj.src = "img/grass" + i + ".png";
+  grass.push(obj);
 }
-grass.src = "img/grass.png";
 
 let bush = new Image();
 bush.onload = function () {

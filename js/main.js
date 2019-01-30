@@ -27,7 +27,7 @@ function drawMap() {
     for(let i in graph) {
       let row = graph[i];
       for(let j in row) {
-        ctx.drawImage(grass, i*32, j*32);
+        ctx.drawImage(grass[getRandomIntInclusive(0,7)], i*32, j*32);
         if(row[j].image) {
           ctx.drawImage(row[j].image, i*32, j*32);
         }
@@ -114,7 +114,7 @@ function walkable(pos) {
   }
 }
 
-function goThroughPath(path, i, s, dir) {
+function goThroughPath(path, callback, i, s, dir) {
   if(!i) i = 0;
   if(!s) s = 0;
   if(path.length-1 != i && path[i]) {
@@ -146,10 +146,11 @@ function goThroughPath(path, i, s, dir) {
     }
     ctx3.drawImage(tractor, 0, kierunek*32, 32, 32, pos.x*32, pos.y*32, 32, 32);
     positionChange();
-    setTimeout(goThroughPath, 100, path, i, s, dir);
+    setTimeout(goThroughPath, 100, path, callback, i, s, dir);
   }
   else {
     blockMoving = false;
+    callback();
   }
 }
 
@@ -199,7 +200,13 @@ function positionChange() {
   ctx2.fillRect(pos.x * 32 + 14, pos.y * 32 + 14, 4, 4);
 }
 
-function goToPos(x, y) {
+function goToPos(x, y, callback) {
   ctx2.clearRect(0, 0, 512, 512);
-  goThroughPath(astar.search(graph, {x: pos.x, y: pos.y}, {x,y}));
+  goThroughPath(astar.search(graph, {x: pos.x, y: pos.y}, {x,y}), callback);
+}
+
+function getRandomIntInclusive(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
