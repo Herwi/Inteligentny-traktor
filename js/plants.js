@@ -25,6 +25,8 @@ class Plant {
   }
 }
 function zaktualizujRosliny(){
+  dzien++;
+  dayUpdate();
   for(let i = 0; i < plants.length; i++) {
     let plancik = plants[i];
     if(plancik) {
@@ -98,9 +100,9 @@ function rozstawRosliny() {
   plants[plants.length-1].wiek = 1;
   console.log("ROZSTAWIONE");
   drawMap();
-  /*setInterval(function() {
+  setInterval(function() {
     zaktualizujRosliny();
-  }, 5000);*/
+  }, 15000);
 }
 
 function getPlantImage(ros) {

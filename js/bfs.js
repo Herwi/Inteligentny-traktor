@@ -5,6 +5,8 @@ function BFS(g, s) {
   let kolejka = [];
   kolejka.push(start);
 
+  let p = { x: s.x, y: s.y };
+
   //init
   for(let a = 0; a < 16; a++) {
     for(let b = 0; b < 16; b++) {
@@ -30,42 +32,48 @@ function BFS(g, s) {
   if(g[s.x] && g[s.x][s.y+1] && !g[s.x][s.y+1].odwiedzony) {
       kolejka.push(g[s.x][s.y+1]);
   }
-  kolejka.shift().odwiedzony = true;
+  kolejka.shift();
+  g[p.x][p.y].odwiedzony = true;
 
   let i = 0;
 
   while(kolejka.length) {
-    console.log(i++ + " : " + kolejka.length);
+    console.log(i + " : " + kolejka.length);
     //console.log("aaa");
     let aktualny = kolejka.shift();
-    if(g[aktualny.x-1] && g[aktualny.x-1][aktualny.y] && !g[aktualny.x-1][aktualny.y].odwiedzony) {
-        kolejka.push(g[aktualny.x-1][aktualny.y]);
-    }
+    if(!aktualny.odwiedzony) {
+      i++;
+      console.log("aktualny (" + aktualny.x + "|" + aktualny.y + ")");
+      if(g[aktualny.x-1] && g[aktualny.x-1][aktualny.y] && !g[aktualny.x-1][aktualny.y].odwiedzony) {
+          kolejka.push(g[aktualny.x-1][aktualny.y]);
+      }
 
-    // East
-    if(g[aktualny.x+1] && g[aktualny.x+1][aktualny.y] && !g[aktualny.x+1][aktualny.y].odwiedzony) {
-        kolejka.push(g[aktualny.x+1][aktualny.y]);
-    }
+      // East
+      if(g[aktualny.x+1] && g[aktualny.x+1][aktualny.y] && !g[aktualny.x+1][aktualny.y].odwiedzony) {
+          kolejka.push(g[aktualny.x+1][aktualny.y]);
+      }
 
-    // South
-    if(g[aktualny.x] && g[aktualny.x][aktualny.y-1] && !g[aktualny.x][aktualny.y-1].odwiedzony) {
-        kolejka.push(g[aktualny.x][aktualny.y-1]);
-    }
+      // South
+      if(g[aktualny.x] && g[aktualny.x][aktualny.y-1] && !g[aktualny.x][aktualny.y-1].odwiedzony) {
+          kolejka.push(g[aktualny.x][aktualny.y-1]);
+      }
 
-    // North
-    if(g[aktualny.x] && g[aktualny.x][aktualny.y+1] && !g[aktualny.x][aktualny.y+1].odwiedzony) {
-        kolejka.push(g[aktualny.x][aktualny.y+1]);
-    }
+      // North
+      if(g[aktualny.x] && g[aktualny.x][aktualny.y+1] && !g[aktualny.x][aktualny.y+1].odwiedzony) {
+          kolejka.push(g[aktualny.x][aktualny.y+1]);
+      }
 
-    aktualny.odwiedzony = true;
-    if(aktualny.plant) {
-      let priotytet = getPriority(aktualny.plant);
-      console.log(priotytet);
-      if(priotytet) {
-        goToPos(aktualny.x, aktualny.y, function() { zadbaj(aktualny); });
-        break;
+      g[aktualny.x][aktualny.y].odwiedzony = true;
+      if(aktualny.plant) {
+        let priotytet = getPriority(aktualny.plant);
+        console.log(priotytet);
+        if(priotytet) {
+          goToPos(aktualny.x, aktualny.y, function() { zadbaj(aktualny); });
+          return;
+        }
       }
     }
   }
+  taskUpdate("Zadna z roslin nie wymaga uwagi");
   console.log("wyszlo");
 }

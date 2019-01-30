@@ -15,6 +15,8 @@ let ctx2 = null;
 let canvas3 = null;
 let ctx3 = null;
 
+
+let dzien = 0;
 // 0 - dół
 // 1 - prawo
 // 2 - góra
@@ -75,6 +77,7 @@ $( document ).ready(function () {
   console.log("LOADED");
   rozstawRosliny();
   drawMap();
+  dayUpdate();
 });
 
 function isCalkowite(cos) {
@@ -118,6 +121,9 @@ function goThroughPath(path, callback, i, s, dir) {
   if(!i) i = 0;
   if(!s) s = 0;
   if(path.length-1 != i && path[i]) {
+    if(i < path.length) {
+      taskUpdate("Zmierzam do (" + path[i+1].x + "|" + path[i+1].y + ")");
+    }
     blockMoving = true;
     ctx3.clearRect(pos.x*32, pos.y*32, 32, 32);
     if(s == 3) {
@@ -131,15 +137,19 @@ function goThroughPath(path, callback, i, s, dir) {
         dir = { x: pos.x - path[i].x, y: pos.y - path[i].y };
       }
       if(dir.x == -1 && dir.y == 0) {
+        kierunek = 1;
         pos.x += 0.25;
       }
       else if (dir.x == 0 && dir.y == -1) {
+        kierunek = 0;
         pos.y += 0.25;
       }
       else if (dir.x == 1 && dir.y == 0) {
+        kierunek = 3;
         pos.x -= 0.25;
       }
       else if (dir.x == 0 && dir.y == 1) {
+        kierunek = 2;
         pos.y -= 0.25;
       }
       s++;
@@ -209,4 +219,12 @@ function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function taskUpdate(s) {
+  $('#task').html('Task: ' + s);
+}
+
+function dayUpdate() {
+  $('#day').html('Dzien: ' + dzien);
 }
