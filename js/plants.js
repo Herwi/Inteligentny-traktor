@@ -102,3 +102,31 @@ function rozstawRosliny() {
     zaktualizujRosliny();
   }, 5000);*/
 }
+
+function zadbaj(plant){
+  console.log("zaczynam dbac o roslinke: " + plant.roslina + "/" + plant.x + "/" + plant.y);
+  if(plant.nawodnienie < 1){
+    setTimeout(function(){
+      plant.nawodnienie = 1;
+    }, 3000);
+  }
+  console.log("Roslina nawodniona");
+  if(plant.nasłonecznienie < 1){
+    setTimeout(function(){
+      plant.nasłonecznienie = 1;
+    }, 3000);
+  }
+  console.log("Roslina ustawiona w stronę słońca");
+  if(plant.nawoz < 1){
+    setTimeout(function(){
+      plant.nawoz = 1;
+    }, 3000);
+  }
+  console.log("Roslina nawieziona");
+  if(plant.chwast == 'tak'){
+    setTimeout(function(){
+      plant.chwast = 'tak';
+    }, 3000);
+  }
+  console.log("Roslina pozbawiona chwastow");
+}
