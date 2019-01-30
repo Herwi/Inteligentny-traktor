@@ -173,6 +173,7 @@ function goThroughPath(path, callback, i, s, dir) {
   }
 }
 
+/*sterowanie manualne
 window.onkeydown = function(event) {
   if(!blockMoving) {
     ctx3.clearRect(pos.x*32, pos.y*32, 32, 32);
@@ -212,7 +213,7 @@ window.onkeydown = function(event) {
     ctx3.drawImage(tractor, 0, kierunek*32, 32, 32, pos.x*32, pos.y*32, 32, 32);
   }
 }
-
+*/
 function positionChange() {
   $('#position').html('x: ' + pos.x + ' y: ' + pos.y);
   ctx2.fillStyle = "#fff";
