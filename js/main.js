@@ -17,6 +17,8 @@ let ctx3 = null;
 
 let canvasR = null;
 let ctxR = null;
+let canvasA = null;
+let ctxA = null;
 
 
 let dzien = 0;
@@ -34,10 +36,10 @@ function drawMap() {
       for(let j in row) {
         ctx.drawImage(grass[getRandomIntInclusive(0,7)], i*32, j*32);
         if(row[j].image) {
-          ctx.drawImage(row[j].image, i*32, j*32);
+          ctxR.drawImage(row[j].image, i*32, j*32);
         }
         else if(row[j].color) {
-          ctx.fillRect(i*32, j*32, 32, 32);
+          ctxR.fillRect(i*32, j*32, 32, 32);
         }
       }
     }
@@ -58,6 +60,10 @@ $( document ).ready(function () {
   ctx2 = canvas2.getContext("2d");
   canvas3 = document.getElementById("layer3");
   ctx3 = canvas3.getContext("2d");
+  canvasR = document.getElementById("layerR");
+  ctxR = canvasR.getContext("2d");
+  canvasA = document.getElementById("layerA");
+  ctxA = canvasA.getContext("2d");
   for(let i = 0; i < 16; i++) {
     graph[i] = [];
     for(let j = 0; j < 16; j++) {
@@ -231,7 +237,7 @@ function getRandomIntInclusive(min, max) {
 }
 
 function taskUpdate(s) {
-  $('#task').html('Task: ' + s);
+  $('#task').html('Zadanie: ' + s);
 }
 
 function dayUpdate() {

@@ -68,6 +68,9 @@ function BFS(g, s) {
         let priotytet = getPriority(aktualny.plant);
         console.log(priotytet);
         if(priotytet) {
+          ctxA.clearRect(0, 0, 512, 512);
+          ctxA.fillStyle = "#00ff00";
+          ctxA.fillRect(aktualny.x*32, aktualny.y*32, 32, 32);
           goToPos(aktualny.x, aktualny.y, function() {
             zadbaj(aktualny);
             setTimeout(function () {

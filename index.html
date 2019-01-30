@@ -92,26 +92,31 @@ footer {
 <section>
   <nav>
     <ul>
-	
+
   <div id="" style="position: relative; ">Aktualna pozycja: </div>
-  <div id="position" style="position: relative; ">x: 2 y: 2</div>
+  <div id="position" style="position: relative; ">x: 0 y: 0</div>
+  <div id="task" style="position: relative; ">Zadanie: </div>
   <div id="day" style="position: relative; ">Dzien: </div>
   <br />
-  <li><button id="buttony" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;"><a onclick="">Start</a></button></li>
+  <li><button id="buttony" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;" onclick="start();">Start</button></li>
   <li><br /></li>
   <li><input type="button" value="Od początku" onClick="location.reload();" style="border: none; background-color: green; border-radius: 10px; padding: 10px 10px; color: white; width: 100%;" /></li>
-  
+
     </ul>
   </nav>
-  
+
   <article>
     <div style="position: relative;">
-   <canvas id="layer1" width="500" height="500"
+   <canvas id="layer1" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 0; background;"></canvas>
-   <canvas id="layer2" width="500" height="500"
+   <canvas id="layerA" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 1; background:transparent;"></canvas>
-   <canvas id="layer3" width="500" height="500"
+   <canvas id="layerR" width="512" height="512"
      style="position: absolute; left: 0; top: 0; z-index: 2; background:transparent;"></canvas>
+   <canvas id="layer2" width="512" height="512"
+     style="position: absolute; left: 0; top: 0; z-index: 3; background:transparent;"></canvas>
+   <canvas id="layer3" width="512" height="512"
+     style="position: absolute; left: 0; top: 0; z-index: 4; background:transparent;"></canvas>
   </div>
   </article>
 </section>
