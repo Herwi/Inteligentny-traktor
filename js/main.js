@@ -2,7 +2,7 @@ let graph = [];
 
 let blockMoving = false;
 
-let pos = { x: 2, y:2 };
+let pos = { x: 0, y:0 };
 //mapa
 let  canvas = null;
 let ctx = null;
@@ -15,26 +15,6 @@ let ctx2 = null;
 let canvas3 = null;
 let ctx3 = null;
 
-let licznik = 0;
-
-let grass = new Image();
-grass.onload = function () {
-   licznik++;
-}
-grass.src = "img/grass.png";
-
-let bush = new Image();
-bush.onload = function () {
-   licznik++;
-}
-bush.src = "img/bush.png";
-
-let tractor = new Image();
-tractor.onload = function () {
-   licznik++;
-}
-tractor.src = "img/traktor.png";
-
 // 0 - dół
 // 1 - prawo
 // 2 - góra
@@ -42,7 +22,7 @@ tractor.src = "img/traktor.png";
 let kierunek = 0;
 
 function drawMap() {
-  if(licznik == 3) {
+  if(licznik == GRAFIKI) {
     ctx.clearRect(0, 0, 512, 512);
     for(let i in graph) {
       let row = graph[i];
@@ -57,6 +37,7 @@ function drawMap() {
       }
     }
     ctx3.drawImage(tractor, 0, kierunek*32, 32, 32, pos.x*32, pos.y*32, 32, 32);
+    positionChange();
   }
   else {
     setTimeout(function () {
@@ -133,16 +114,39 @@ function walkable(pos) {
   }
 }
 
-function goThroughPath(path, i) {
+function goThroughPath(path, i, s, dir) {
   if(!i) i = 0;
+  if(!s) s = 0;
   if(path.length-1 != i && path[i]) {
     blockMoving = true;
     ctx3.clearRect(pos.x*32, pos.y*32, 32, 32);
-    pos.x = path[i].x;
-    pos.y = path[i].y;
+    if(s == 3) {
+      pos.x = path[i].x;
+      pos.y = path[i].y;
+      i++;
+      s = 0;
+    }
+    else {
+      if(s == 0) {
+        dir = { x: pos.x - path[i].x, y: pos.y - path[i].y };
+      }
+      if(dir.x == -1 && dir.y == 0) {
+        pos.x += 0.25;
+      }
+      else if (dir.x == 0 && dir.y == -1) {
+        pos.y += 0.25;
+      }
+      else if (dir.x == 1 && dir.y == 0) {
+        pos.x -= 0.25;
+      }
+      else if (dir.x == 0 && dir.y == 1) {
+        pos.y -= 0.25;
+      }
+      s++;
+    }
     ctx3.drawImage(tractor, 0, kierunek*32, 32, 32, pos.x*32, pos.y*32, 32, 32);
     positionChange();
-    setTimeout(goThroughPath, 50, path, i+1);
+    setTimeout(goThroughPath, 100, path, i, s, dir);
   }
   else {
     blockMoving = false;
@@ -191,9 +195,11 @@ window.onkeydown = function(event) {
 
 function positionChange() {
   $('#position').html('x: ' + pos.x + ' y: ' + pos.y);
+  ctx2.fillStyle = "#fff";
+  ctx2.fillRect(pos.x * 32 + 14, pos.y * 32 + 14, 4, 4);
 }
 
 function goToPos(x, y) {
-  ctx2.clearRect(0, 0, 500, 500);
+  ctx2.clearRect(0, 0, 512, 512);
   goThroughPath(astar.search(graph, {x: pos.x, y: pos.y}, {x,y}));
 }

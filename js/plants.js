@@ -77,8 +77,8 @@ function rozstawRosliny() {
     let y = Math.floor(Math.random() * 16);
     while(true) {
       if(graph[x] && graph[x][y] && graph[x][y].color == null) {
-        graph[x][y].color = "#42f471";
         graph[x][y].plant = plants[i];
+        graph[x][y].image = getPlantImage(plants[i].roslina);
         break;
       }
       else {
@@ -92,4 +92,26 @@ function rozstawRosliny() {
   /*setInterval(function() {
     zaktualizujRosliny();
   }, 5000);*/
+}
+
+function getPlantImage(ros) {
+  switch (ros) {
+    case "Ogorek":
+      return ogorek;
+      break;
+    case "Pomidor":
+      return pomidor;
+      break;
+    case "Cebula":
+      return cebula;
+      break;
+    case "Zyto":
+      return zyto;
+      break;
+    case "Ziemniaki":
+      return ziemniaki;
+      break;
+    default:
+      return null;
+  }
 }
