@@ -9,7 +9,7 @@ class Plant {
     this.poziom_stresu = Math.floor((Math.random())*10)/10;
     //this.nawodnienie = 0.9;
     //this.naslonecznienie = 0.3;
-    this.nawoz = 0.1;
+    this.nawoz = Math.floor((Math.random())*10)/10;;
     //this.poziom_stresu = 0.7;
     if(Math.round((Math.random())) == 0) {
       this.chwasty = 'nie';
@@ -25,7 +25,6 @@ class Plant {
   }
 }
 function zaktualizujRosliny(){
-  console.log("F Dziala");
   for(let i = 0; i < plants.length; i++) {
     let plancik = plants[i];
     if(plancik) {
@@ -38,6 +37,9 @@ function zaktualizujRosliny(){
       if(plancik.poziom_stresu < 1) {
         plancik.poziom_stresu = parseFloat((plancik.poziom_stresu + 0.1).toFixed(2));
       }
+	  if(plancik.nawoz > 0){
+		  plancik.nawoz = parseFloat((plancik.nawoz - 0.1).toFixed(2));
+	  }
       if(Math.round((Math.random())) == 0) {
         plancik.chwasty = 'nie';
       }
@@ -46,7 +48,7 @@ function zaktualizujRosliny(){
       }
       plancik.wiek += 1;
       if(plancik.wiek >= 30 && plancik.dojrzala == 'nie') { plancik.dojrzala='tak'; }
-      console.log("Nawodnienie:" + plancik.nawodnienie + " Naslonecznienie:" + plancik.naslonecznienie + " Stres:" + plancik.poziom_stresu + " Chwast:" + plancik.chwast + " Wiek:" + plancik.wiek + " Wynik drzewa " + getPriority(plancik));
+      console.log("Nawodnienie: " + plancik.nawodnienie + " Naslonecznienie: " + plancik.naslonecznienie + " Stres: " + plancik.poziom_stresu + " Nawoz: " + plancik.nawoz + " Chwast: " + plancik.chwasty + " Wiek: " + plancik.wiek + " Typ: " + plancik.typ + " Wynik drzewa: " + getPriority(plancik));
     }
   }
   /*plants.forEach(Plant => {
@@ -69,7 +71,7 @@ function rozstawRosliny() {
     plants.push(new Plant('Ogorek', 'kopane'));
     plants.push(new Plant('Pomidor', 'krzak'));
     plants.push(new Plant('Cebula', 'kopane'));
-    plants.push(new Plant('Zyto', 'żniwa'));
+    plants.push(new Plant('Zyto', 'zniwa'));
     plants.push(new Plant('Ziemniaki', 'kopane'));
   }
   for(let i in plants) {
@@ -87,6 +89,13 @@ function rozstawRosliny() {
       }
     }
   }
+  plants.push(new Plant('Ogorek', 'kopane'));
+  plants[plants.length-1].nawodnienie = 1;
+  plants[plants.length-1].naslonecznienie = 1;
+  plants[plants.length-1].poziom_stresu = 0;
+  plants[plants.length-1].nawoz = 1;
+  plants[plants.length-1].chwast = 'nie';
+  plants[plants.length-1].wiek = 1;
   console.log("ROZSTAWIONE");
   drawMap();
   /*setInterval(function() {
