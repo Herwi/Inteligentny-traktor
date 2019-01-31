@@ -22,6 +22,8 @@ let ctxA = null;
 
 
 let dzien = 0;
+let cyklDzienny = null;
+
 // 0 - dół
 // 1 - prawo
 // 2 - góra
@@ -246,8 +248,25 @@ function dayUpdate() {
 }
 
 function start() {
-  setInterval(function() {
+  cyklDzienny = setInterval(function() {
     zaktualizujRosliny();
   }, 15000);
   BFS(graph, pos);
+}
+
+function debug() {
+  for(let i = 0; i < 16; i++) {
+	for(let j = 0; j < 16; j++) {
+		if(graph[i] && graph[i][j] && graph[i][j].plant) {
+			ctx.fillStyle = "#ff0000";
+			ctx.fillRect(i*32, j*32, 32, 32);
+    }}}
+}
+
+function plantInfo() {
+  for(let i = 0; i < 16; i++) {
+	for(let j = 0; j < 16; j++) {
+		if(graph[i] && graph[i][j] && graph[i][j].plant) {
+			console.log("x: " + graph[i][j].x + "y: " + graph[i][j].y + " " + graph[i][j].plant.roslina);
+    }}}
 }

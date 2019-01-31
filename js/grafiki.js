@@ -1,4 +1,4 @@
-let GRAFIKI = 25;
+let GRAFIKI = 26;
 
 let licznik = 0;
 
@@ -113,3 +113,9 @@ salata.onload = function () {
    licznik++;
 }
 salata.src = "img/Salata.png";
+
+let burak = new Image();
+burak.onload = function () {
+   licznik++;
+}
+burak.src = "img/Burak.png";

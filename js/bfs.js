@@ -1,4 +1,5 @@
 function BFS(g, s) {
+  let iloscPlantow = 0;
   console.log("BFS");
   let start = g[s.x][s.y];
 
@@ -65,6 +66,7 @@ function BFS(g, s) {
 
       g[aktualny.x][aktualny.y].odwiedzony = true;
       if(aktualny.plant) {
+        iloscPlantow++;
         let priotytet = getPriority(aktualny.plant);
         console.log(priotytet);
         if(priotytet) {
@@ -73,9 +75,6 @@ function BFS(g, s) {
           ctxA.fillRect(aktualny.x*32, aktualny.y*32, 32, 32);
           goToPos(aktualny.x, aktualny.y, function() {
             zadbaj(aktualny);
-            setTimeout(function () {
-              BFS(graph, pos);
-            }, 100);
           });
           return;
         }
@@ -83,8 +82,15 @@ function BFS(g, s) {
     }
   }
   taskUpdate("Zadna z roslin nie wymaga uwagi");
-  setTimeout(function () {
-    BFS(graph, pos);
-  }, 1000);
+  if(iloscPlantow > 0) {
+    setTimeout(function () {
+      BFS(graph, pos);
+    }, 1000);
+  }
+  else {
+    taskUpdate("Wszystkie rosliny zostaly zebrane, traktor zakonczyl prace.");
+    clearInterval(cyklDzienny);
+  }
+
   console.log("wyszlo");
 }

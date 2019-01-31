@@ -31,16 +31,16 @@ function zaktualizujRosliny(){
     let plancik = plants[i];
     if(plancik) {
       if(plancik.nawodnienie > 0) {
-        plancik.nawodnienie = parseFloat((plancik.nawodnienie - 0.1).toFixed(2));
+        plancik.nawodnienie = parseFloat((plancik.nawodnienie - 0.01 * getRandomIntInclusive(1,20)).toFixed(2));
       }
       if(plancik.naslonecznienie > 0) {
-        plancik.naslonecznienie = parseFloat((plancik.naslonecznienie - 0.1).toFixed(2));
+        plancik.naslonecznienie = parseFloat((plancik.naslonecznienie - 0.01 * getRandomIntInclusive(1,20)).toFixed(2));
       }
       if(plancik.poziom_stresu < 1) {
-        plancik.poziom_stresu = parseFloat((plancik.poziom_stresu + 0.1).toFixed(2));
+        plancik.poziom_stresu = parseFloat((plancik.poziom_stresu + 0.01 * getRandomIntInclusive(1,20)).toFixed(2));
       }
 	  if(plancik.nawoz > 0){
-		  plancik.nawoz = parseFloat((plancik.nawoz - 0.1).toFixed(2));
+		  plancik.nawoz = parseFloat((plancik.nawoz - 0.01  * getRandomIntInclusive(1,20)).toFixed(2));
 	  }
       if(Math.round((Math.random())) == 0) {
         plancik.chwasty = 'nie';
@@ -91,12 +91,13 @@ function rozstawRosliny() {
   for(let i = 0; i < 20; i++) {
     let a = getRandomInt(0, roslinki.length);
     plants.push(new Plant(roslinki[a].nazwa, roslinki[a].typ));
+    //plants.push(new Plant(roslinki[i].nazwa, roslinki[i].typ));
   }
   for(let i in plants) {
     let x = Math.floor(Math.random() * 16);
     let y = Math.floor(Math.random() * 16);
     while(true) {
-      if(graph[x] && graph[x][y] && graph[x][y].color == null) {
+      if(graph[x] && graph[x][y] && graph[x][y].plant == null && graph[x][y].image == null) {
         graph[x][y].plant = plants[i];
         graph[x][y].image = getPlantImage(plants[i].roslina);
         break;
@@ -166,44 +167,62 @@ function getPlantImage(ros) {
     case "Salata":
       return salata;
       break;
+    case "Burak":
+      return burak;
+      break;
     default:
       return null;
   }
 }
-function zadbaj(pole){
+
+function nastepny() {
+  setTimeout(function () {
+    BFS(graph, pos);
+  }, 100);}
+
+function zadbaj(pole, pierwszy){
   let plant = pole.plant;
-  console.log("zaczynam dbac o roslinke: " + plant.roslina + " x: " + pole.x + " y: " + pole.y);
-  if(plant.nawodnienie < 1){
-    setTimeout(function(){
-      plant.nawodnienie = 1;
-      console.log("Roslina nawodniona");
-    }, 10);
-  }
-
-  if(plant.naslonecznienie < 1){
-    setTimeout(function(){
-      plant.naslonecznienie = 1;
-      console.log("Roslina ustawiona w stronę słońca");
-    }, 10);
-  }
-
-  if(plant.nawoz < 1){
-    setTimeout(function(){
-      plant.nawoz = 1;
-      console.log("Roslina nawieziona");
-    }, 10);
-  }
-
-  if(plant.chwast == 'tak'){
-    setTimeout(function(){
-      plant.chwast = 'tak';
-      console.log("Roslina pozbawiona chwastow");
-    }, 10);
-  }
-
-  if(plant.wiek >= 30) {
-    pole.plant = null;
-    ctxR.clearRect(pole.x*32, pole.y*32, 32, 32);
-  }
-
+  let odstep = 200;
+  if(!pierwszy) { odstep = 1000; taskUpdate("Zaczynam dbac o roslinke: " + plant.roslina + " x: " + pole.x + " y: " + pole.y); pierwszy = true; }
+  setTimeout(function () {
+    if(plant && plant.dojrzala == 'tak') {
+      taskUpdate('Zrywam roslinke');
+      setTimeout(function () {
+        pole.plant = null;
+        ctxR.clearRect(pole.x*32, pole.y*32, 32, 32);
+        zadbaj(pole, pierwszy);
+      }, 100);
+    }
+    else if(plant && plant.nawodnienie < 0.8){
+      taskUpdate("Nawadniam roslinke");
+      setTimeout(function(){
+        plant.nawodnienie = 1;
+        zadbaj(pole, pierwszy)
+      }, 100);
+    }
+    else if(plant && plant.naslonecznienie < 0.8){
+      taskUpdate("Ustawiam rosline w strone slonca");
+      setTimeout(function(){
+        plant.naslonecznienie = 1;
+        zadbaj(pole, pierwszy)
+      }, 100);
+    }
+    else if(plant && plant.nawoz < 0.8){
+      taskUpdate("Nawoze rosline");
+      setTimeout(function(){
+        plant.nawoz = 1;
+        zadbaj(pole, pierwszy)
+      }, 100);
+    }
+    else if(plant && plant.chwasty == 'tak'){
+      taskUpdate("Wycinam chwasty");
+      setTimeout(function(){
+        plant.chwasty = 'nie';
+        zadbaj(pole, pierwszy)
+      }, 100);
+    }
+    else {
+      nastepny();
+    }
+  }, odstep);
 }
